@@ -21,6 +21,10 @@ enum TokenType {
     REGEX_NO_SLASH,
     REGEX_NO_SPACE,
     EXPANSION_WORD,
+    DEFAULT_VALUE_WORD,
+    DEFAULT_VALUE_PUNCTUATION,
+    DEFAULT_VALUE_START_CONCAT,
+    DEFAULT_VALUE_CONCAT,
     EXTGLOB_PATTERN,
     BARE_DOLLAR,
     BRACE_START,
@@ -347,17 +351,27 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
 }
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
-    if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
-        if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) || lexer->lookahead == '>' ||
+    if (valid_symbols[DEFAULT_VALUE_START_CONCAT] && !in_error_recovery(valid_symbols) &&
+        (lexer->lookahead == ';' || lexer->lookahead == '|' || lexer->lookahead == '&' ||
+         lexer->lookahead == '<' || lexer->lookahead == '>')) {
+        lexer->result_symbol = DEFAULT_VALUE_START_CONCAT;
+        return true;
+    }
+
+    if ((valid_symbols[CONCAT] || valid_symbols[DEFAULT_VALUE_CONCAT]) && !in_error_recovery(valid_symbols)) {
+        if ((valid_symbols[DEFAULT_VALUE_CONCAT] &&
+             (lexer->lookahead == ';' || lexer->lookahead == '|' || lexer->lookahead == '&' ||
+              lexer->lookahead == '<' || lexer->lookahead == '>' || lexer->lookahead == '\\')) ||
+            !(lexer->lookahead == 0 || iswspace(lexer->lookahead) || lexer->lookahead == '>' ||
               lexer->lookahead == '<' || lexer->lookahead == ')' || lexer->lookahead == '(' ||
               lexer->lookahead == ';' || lexer->lookahead == '&' || lexer->lookahead == '|' ||
               (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) ||
               (lexer->lookahead == ']' && valid_symbols[CLOSING_BRACKET]))) {
-            lexer->result_symbol = CONCAT;
+            lexer->result_symbol = valid_symbols[DEFAULT_VALUE_CONCAT] ? DEFAULT_VALUE_CONCAT : CONCAT;
             // So for a`b`, we want to return a concat. We check if the
             // 2nd backtick has whitespace after it, and if it does we
             // return concat.
-            if (lexer->lookahead == '`') {
+            if (lexer->lookahead == '`' && !valid_symbols[DEFAULT_VALUE_CONCAT]) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 while (lexer->lookahead != '`' && !lexer->eof(lexer)) {
@@ -374,6 +388,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             // strings w/ expansions that contains escaped quotes or
             // backslashes need this to return a concat
             if (lexer->lookahead == '\\') {
+                if (valid_symbols[DEFAULT_VALUE_CONCAT]) {
+                    return true;
+                }
                 lexer->mark_end(lexer);
                 advance(lexer);
                 if (lexer->lookahead == '"' || lexer->lookahead == '\'' || lexer->lookahead == '\\') {
@@ -387,8 +404,48 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             }
         }
         if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE] && !valid_symbols[EXPANSION_WORD]) {
-            lexer->result_symbol = CONCAT;
+            lexer->result_symbol = valid_symbols[DEFAULT_VALUE_CONCAT] ? DEFAULT_VALUE_CONCAT : CONCAT;
             return true;
+        }
+    }
+
+    // Only double-quoted defaults treat these punctuation runs as literal words.
+    // Consume escapes together and leave substitutions and quotes to the grammar.
+    bool punctuation = lexer->lookahead == ';' || lexer->lookahead == '|' || lexer->lookahead == '&' ||
+                       lexer->lookahead == '<' || lexer->lookahead == '>';
+    if (!in_error_recovery(valid_symbols) &&
+        ((valid_symbols[DEFAULT_VALUE_PUNCTUATION] && punctuation) ||
+         (valid_symbols[DEFAULT_VALUE_WORD] &&
+          (punctuation || lexer->lookahead == '\\' || lexer->lookahead == '$' || lexer->lookahead == '\'')))) {
+        bool advanced = false;
+        lexer->result_symbol = valid_symbols[DEFAULT_VALUE_PUNCTUATION] && punctuation
+                                   ? DEFAULT_VALUE_PUNCTUATION
+                                   : DEFAULT_VALUE_WORD;
+        for (;;) {
+            lexer->mark_end(lexer);
+            if (lexer->eof(lexer) || lexer->lookahead == '}' || lexer->lookahead == '`' ||
+                lexer->lookahead == '"') {
+                return advanced;
+            }
+            if (lexer->lookahead == '$') {
+                advance(lexer);
+                if (iswalnum(lexer->lookahead) || lexer->lookahead == '_' || lexer->lookahead == '{' ||
+                    lexer->lookahead == '(' || lexer->lookahead == '[' || lexer->lookahead == '\'' || lexer->lookahead == '"' ||
+                    lexer->lookahead == '`' || lexer->lookahead == '*' || lexer->lookahead == '@' ||
+                    lexer->lookahead == '?' || lexer->lookahead == '!' || lexer->lookahead == '#' ||
+                    lexer->lookahead == '-' || lexer->lookahead == '$') {
+                    return advanced;
+                }
+            } else {
+                if (lexer->lookahead == '\\') {
+                    advance(lexer);
+                    if (lexer->eof(lexer)) {
+                        return false;
+                    }
+                }
+                advance(lexer);
+            }
+            advanced = true;
         }
     }
 
@@ -1069,6 +1126,9 @@ extglob_pattern:
     }
 
 expansion_word:
+    if (valid_symbols[DEFAULT_VALUE_WORD] && !in_error_recovery(valid_symbols) && lexer->lookahead == '`') {
+        return false;
+    }
     if (valid_symbols[EXPANSION_WORD]) {
         bool advanced_once = false;
         bool advance_once_space = false;
