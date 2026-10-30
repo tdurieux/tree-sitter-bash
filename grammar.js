@@ -1000,6 +1000,7 @@ module.exports = grammar({
         $.parenthesized_expression,
         $.command_substitution,
         alias($._expansion_max_length_binary_expression, $.binary_expression),
+        alias($._expansion_negative_offset, $.unary_expression),
         /\n/,
       )),
       optional(seq(
@@ -1016,6 +1017,16 @@ module.exports = grammar({
           /\n/,
         )),
       )),
+    ),
+
+    _expansion_negative_offset: $ => seq(
+      field('operator', '-'),
+      alias($._expansion_offset_variable, $.simple_expansion),
+    ),
+
+    _expansion_offset_variable: $ => seq(
+      '$',
+      alias(token.immediate(/[a-zA-Z_]\w*/), $.variable_name),
     ),
 
     _expansion_max_length_expression: $ => choice(

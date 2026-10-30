@@ -6132,6 +6132,15 @@
                   "value": "binary_expression"
                 },
                 {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_expansion_negative_offset"
+                  },
+                  "named": true,
+                  "value": "unary_expression"
+                },
+                {
                   "type": "PATTERN",
                   "value": "\\n"
                 }
@@ -6224,6 +6233,49 @@
               "type": "BLANK"
             }
           ]
+        }
+      ]
+    },
+    "_expansion_negative_offset": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "operator",
+          "content": {
+            "type": "STRING",
+            "value": "-"
+          }
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_expansion_offset_variable"
+          },
+          "named": true,
+          "value": "simple_expansion"
+        }
+      ]
+    },
+    "_expansion_offset_variable": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "$"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PATTERN",
+              "value": "[a-zA-Z_]\\w*"
+            }
+          },
+          "named": true,
+          "value": "variable_name"
         }
       ]
     },
