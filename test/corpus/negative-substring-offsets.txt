@@ -581,3 +581,111 @@ echo "${x:2:n---$m}"
           (word))
         (simple_expansion
           (variable_name))))))
+
+================================================================================
+Braced negative offset preserves the next command
+================================================================================
+
+echo "${x: -${n}}"
+echo retained
+
+--------------------------------------------------------------------------------
+
+(program
+  (command
+    (command_name (word))
+    (string
+      (expansion
+        (variable_name)
+        (unary_expression
+          (expansion (variable_name))))))
+  (command
+    (command_name (word))
+    (word)))
+
+================================================================================
+Braced negative array offset preserves the next command
+================================================================================
+
+echo "${build_armbian[@]: -${slice_num}}"
+echo retained
+
+--------------------------------------------------------------------------------
+
+(program
+  (command
+    (command_name (word))
+    (string
+      (expansion
+        (subscript (variable_name) (word))
+        (unary_expression
+          (expansion (variable_name))))))
+  (command
+    (command_name (word))
+    (word)))
+
+================================================================================
+Braced negative offset with concatenated length
+================================================================================
+
+echo "${x: -${n}:$m${z}}"
+echo retained
+
+--------------------------------------------------------------------------------
+
+(program
+  (command
+    (command_name (word))
+    (string
+      (expansion
+        (variable_name)
+        (unary_expression
+          (expansion (variable_name)))
+        (simple_expansion (variable_name))
+        (expansion (variable_name)))))
+  (command
+    (command_name (word))
+    (word)))
+
+================================================================================
+Braced negative offset with a default value
+================================================================================
+
+echo "${x: -${n:-2}}"
+echo retained
+
+--------------------------------------------------------------------------------
+
+(program
+  (command
+    (command_name (word))
+    (string
+      (expansion
+        (variable_name)
+        (unary_expression
+          (expansion (variable_name) (word))))))
+  (command
+    (command_name (word))
+    (word)))
+
+================================================================================
+Unsupported braced negative offset arithmetic preserves the next command
+================================================================================
+
+echo "${x: -${n}+1}"
+echo retained
+
+--------------------------------------------------------------------------------
+
+(program
+  (command
+    (command_name (word))
+    (string
+      (ERROR
+        (variable_name)
+        (unary_expression
+          (expansion (variable_name)))
+        (word))))
+  (command
+    (command_name (word))
+    (word)))

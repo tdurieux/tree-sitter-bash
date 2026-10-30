@@ -1021,7 +1021,10 @@ module.exports = grammar({
 
     _expansion_negative_offset: $ => seq(
       field('operator', '-'),
-      alias($._expansion_offset_variable, $.simple_expansion),
+      choice(
+        alias($._expansion_offset_variable, $.simple_expansion),
+        $.expansion,
+      ),
     ),
 
     _expansion_offset_variable: $ => seq(

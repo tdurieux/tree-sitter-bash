@@ -6248,13 +6248,22 @@
           }
         },
         {
-          "type": "ALIAS",
-          "content": {
-            "type": "SYMBOL",
-            "name": "_expansion_offset_variable"
-          },
-          "named": true,
-          "value": "simple_expansion"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_expansion_offset_variable"
+              },
+              "named": true,
+              "value": "simple_expansion"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "expansion"
+            }
+          ]
         }
       ]
     },
