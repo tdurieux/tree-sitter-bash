@@ -347,7 +347,9 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
 }
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
-    if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
+    // A subscript can end with a bare '$', but '$name' must remain an expansion.
+    if (valid_symbols[CONCAT] && !(valid_symbols[VARIABLE_NAME] && valid_symbols[CLOSING_BRACKET]) &&
+        !in_error_recovery(valid_symbols)) {
         if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) || lexer->lookahead == '>' ||
               lexer->lookahead == '<' || lexer->lookahead == ')' || lexer->lookahead == '(' ||
               lexer->lookahead == ';' || lexer->lookahead == '&' || lexer->lookahead == '|' ||
