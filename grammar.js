@@ -529,7 +529,7 @@ module.exports = grammar({
       field('descriptor', optional($.file_descriptor)),
       choice(
         seq(
-          choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
+          choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|', '<>'),
           field('destination', repeat1($._literal)),
         ),
         seq(

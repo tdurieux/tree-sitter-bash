@@ -1143,7 +1143,7 @@ expansion_word:
     }
 
 brace_start:
-    if (valid_symbols[BRACE_START] && !in_error_recovery(valid_symbols)) {
+    if ((valid_symbols[BRACE_START] || valid_symbols[FILE_DESCRIPTOR]) && !in_error_recovery(valid_symbols)) {
         while (iswspace(lexer->lookahead)) {
             skip(lexer);
         }
@@ -1154,6 +1154,23 @@ brace_start:
 
         advance(lexer);
         lexer->mark_end(lexer);
+
+        if (valid_symbols[FILE_DESCRIPTOR] && (iswalpha(lexer->lookahead) || lexer->lookahead == '_')) {
+            do {
+                advance(lexer);
+            } while (iswalnum(lexer->lookahead) || lexer->lookahead == '_');
+            if (lexer->lookahead != '}') {
+                return false;
+            }
+            advance(lexer);
+            lexer->mark_end(lexer);
+            lexer->result_symbol = FILE_DESCRIPTOR;
+            return lexer->lookahead == '<' || lexer->lookahead == '>';
+        }
+
+        if (!valid_symbols[BRACE_START]) {
+            return false;
+        }
 
         while (isdigit(lexer->lookahead)) {
             advance(lexer);
