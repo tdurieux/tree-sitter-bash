@@ -309,6 +309,88 @@
               ]
             },
             {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "FIELD",
+                  "name": "body",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "compound_statement"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "subshell"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "for_statement"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "c_style_for_statement"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "case_statement"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "FIELD",
+                  "name": "redirect",
+                  "content": {
+                    "type": "REPEAT",
+                    "content": {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "file_redirect"
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "heredoc_redirect"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "FIELD",
+                  "name": "redirect",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "herestring_redirect"
+                  }
+                },
+                {
+                  "type": "FIELD",
+                  "name": "redirect",
+                  "content": {
+                    "type": "REPEAT",
+                    "content": {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "_redirect"
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "heredoc_redirect"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
               "type": "FIELD",
               "name": "redirect",
               "content": {

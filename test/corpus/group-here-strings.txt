@@ -1,0 +1,349 @@
+================================================================================
+Here strings after compound commands
+================================================================================
+
+{ cat; } <<< "$x"
+(cat) <<< "$x"
+for x in a; do cat; done <<< "$x"
+for ((i=0;i<1;i++)); do cat; done <<< "$x"
+case x in x) cat;; esac <<< "$x"
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (compound_statement
+      (command
+        (command_name
+          (word))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (subshell
+      (command
+        (command_name
+          (word))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (for_statement
+      (variable_name)
+      (word)
+      (do_group
+        (command
+          (command_name
+            (word)))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (c_style_for_statement
+      (variable_assignment
+        (variable_name)
+        (number))
+      (binary_expression
+        (word)
+        (number))
+      (postfix_expression
+        (word))
+      (do_group
+        (command
+          (command_name
+            (word)))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (case_statement
+      (word)
+      (case_item
+        (word)
+        (command
+          (command_name
+            (word)))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name))))))
+
+================================================================================
+Here strings with other redirects
+================================================================================
+
+{ cat; } >out <<< "$x"
+{ cat; } <<< "$x" >out
+(cat) 3<<< "$x" 4<<< "$y"
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (compound_statement
+      (command
+        (command_name
+          (word))))
+    (file_redirect
+      (word))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (compound_statement
+      (command
+        (command_name
+          (word))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name))))
+    (file_redirect
+      (word)))
+  (redirected_statement
+    (subshell
+      (command
+        (command_name
+          (word))))
+    (herestring_redirect
+      (file_descriptor)
+      (string
+        (simple_expansion
+          (variable_name))))
+    (herestring_redirect
+      (file_descriptor)
+      (string
+        (simple_expansion
+          (variable_name))))))
+
+================================================================================
+Here string controls
+================================================================================
+
+if true; then cat; fi <<< "$x"
+while false; do cat; done <<< "$x"
+cat <<< "$x"
+<<< "$x"
+{ cat; } <in >out
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (if_statement
+      (command
+        (command_name
+          (word)))
+      (command
+        (command_name
+          (word))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (while_statement
+      (command
+        (command_name
+          (word)))
+      (do_group
+        (command
+          (command_name
+            (word)))))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (command
+    (command_name
+      (word))
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (herestring_redirect
+      (string
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (compound_statement
+      (command
+        (command_name
+          (word))))
+    (file_redirect
+      (word))
+    (file_redirect
+      (word))))
+
+================================================================================
+Preserve existing compound here string redirects 1
+================================================================================
+
+if true; then cat; fi <<<"$x" >out
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (redirected_statement
+      (if_statement
+        (command
+          (command_name
+            (word)))
+        (command
+          (command_name
+            (word))))
+      (herestring_redirect
+        (string
+          (simple_expansion
+            (variable_name)))))
+    (file_redirect
+      (word))))
+
+================================================================================
+Preserve existing compound here string redirects 2
+================================================================================
+
+if true; then cat; fi <<<"$x" <in >out
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (redirected_statement
+      (if_statement
+        (command
+          (command_name
+            (word)))
+        (command
+          (command_name
+            (word))))
+      (herestring_redirect
+        (string
+          (simple_expansion
+            (variable_name)))))
+    (file_redirect
+      (word))
+    (file_redirect
+      (word))))
+
+================================================================================
+Preserve existing compound here string redirects 3
+================================================================================
+
+if true; then cat; fi <<<"$x" <<EOF
+hello
+EOF
+
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (redirected_statement
+      (if_statement
+        (command
+          (command_name
+            (word)))
+        (command
+          (command_name
+            (word))))
+      (herestring_redirect
+        (string
+          (simple_expansion
+            (variable_name)))))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
+
+================================================================================
+Preserve existing compound here string redirects 5
+================================================================================
+
+while false; do cat; done <<<"$x" >out
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (redirected_statement
+      (while_statement
+        (command
+          (command_name
+            (word)))
+        (do_group
+          (command
+            (command_name
+              (word)))))
+      (herestring_redirect
+        (string
+          (simple_expansion
+            (variable_name)))))
+    (file_redirect
+      (word))))
+
+================================================================================
+Preserve existing compound here string redirects 6
+================================================================================
+
+while false; do cat; done <<<"$x" <in >out
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (redirected_statement
+      (while_statement
+        (command
+          (command_name
+            (word)))
+        (do_group
+          (command
+            (command_name
+              (word)))))
+      (herestring_redirect
+        (string
+          (simple_expansion
+            (variable_name)))))
+    (file_redirect
+      (word))
+    (file_redirect
+      (word))))
+
+================================================================================
+Preserve existing compound here string redirects 7
+================================================================================
+
+while false; do cat; done <<<"$x" <<EOF
+hello
+EOF
+
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    (redirected_statement
+      (while_statement
+        (command
+          (command_name
+            (word)))
+        (do_group
+          (command
+            (command_name
+              (word)))))
+      (herestring_redirect
+        (string
+          (simple_expansion
+            (variable_name)))))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
