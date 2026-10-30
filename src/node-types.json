@@ -1645,6 +1645,10 @@
         {
           "type": "expansion",
           "named": true
+        },
+        {
+          "type": "simple_expansion",
+          "named": true
         }
       ]
     }

@@ -5252,6 +5252,10 @@
               "members": [
                 {
                   "type": "SYMBOL",
+                  "name": "simple_expansion"
+                },
+                {
+                  "type": "SYMBOL",
                   "name": "expansion"
                 },
                 {

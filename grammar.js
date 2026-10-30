@@ -860,7 +860,7 @@ module.exports = grammar({
     number: $ => choice(
       /-?(0x)?[0-9]+(#[0-9A-Za-z@_]+)?/,
       // the base can be an expansion or command substitution
-      seq(/-?(0x)?[0-9]+#/, choice($.expansion, $.command_substitution)),
+      seq(/-?(0x)?[0-9]+#/, choice($.simple_expansion, $.expansion, $.command_substitution)),
     ),
 
     simple_expansion: $ => seq(

@@ -1,0 +1,69 @@
+================================================================================
+Dynamic numeric bases
+================================================================================
+
+n=$((10#$v))
+n=$((16#$hex + 2#$bits))
+n=$((10#$1))
+
+--------------------------------------------------------------------------------
+
+(program
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (number
+        (simple_expansion
+          (variable_name)))))
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (binary_expression
+        (number
+          (simple_expansion
+            (variable_name)))
+        (number
+          (simple_expansion
+            (variable_name))))))
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (number
+        (simple_expansion
+          (variable_name))))))
+
+================================================================================
+Numeric base controls
+================================================================================
+
+n=$((10#123))
+n=$((16#ff))
+n=$((10#${v}))
+n=$((10#$(echo 123)))
+
+--------------------------------------------------------------------------------
+
+(program
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (number)))
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (number)))
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (number
+        (expansion
+          (variable_name)))))
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (number
+        (command_substitution
+          (command
+            (command_name
+              (word))
+            (number)))))))
